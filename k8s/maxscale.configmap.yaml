@@ -1,0 +1,87 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: maxscale-cnf
+data:
+  maxscale.cnf: |-
+    # example configmap
+    [MaxScale]
+    substitute_variables=false
+    #syslog=0
+    threads=1
+    #auth_connect_timeout=60
+    #auth_read_timeout=60
+
+    [Galera-Monitor]
+    type=monitor
+    module=galeramon
+    servers=db1, db2, db3
+    user=stackdriver_user
+    password=thisIsADemoanditIsInsecure
+    monitor_interval=2000
+
+    [ReadWriteSplit-Service]
+    #localhost_match_wildcard_host=1
+    passwd=maxscaledemo
+    router=readwritesplit
+    servers=db1,db2,db3
+    type=service
+    user=maxscale1
+
+    [ReadWriteSplit-Listener]
+    address=0.0.0.0
+    port=3306
+    protocol=MariaDBClient
+    service=ReadWriteSplit-Service
+    type=listener
+
+    [MasterOnly-Service]
+    localhost_match_wildcard_host=1
+    passwd=maxscaledemo
+    router_options=master
+    router=readconnroute
+    servers=db1
+    type=service
+    user=maxscale1
+
+    [MasterOnly-Listener]
+    address=0.0.0.0
+    port=6033
+    protocol=MariaDBClient
+    service=MasterOnly-Service
+    type=listener
+
+    [db1]
+    type=server
+    address=10.13.0.50
+    port=3306
+    protocol=MariaDBBackend
+
+
+    [db2]
+    type=server
+    address=10.13.0.51
+    port=3306
+    protocol=MariaDBBackend
+
+    [db3]
+    type=server
+    address=10.13.0.52
+    port=3306
+    protocol=MariaDBBackend
+    #priority=
+
+
+    [MaxInfo]
+    type=service
+    router=maxinfo
+    #user=monitor
+    #passwd=$SERVICE_PWD
+
+    [MaxInfo-JSON-Listener]
+    type=listener
+    service=MaxInfo
+    protocol=HTTPD
+    port=8003
+
