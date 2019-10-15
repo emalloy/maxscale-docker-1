@@ -1,0 +1,17 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: maxscale
+  labels:
+    run: maxscale
+spec:
+  ports:
+  - port: 3306
+    name: rw-split
+    protocol: TCP
+  - port: 6033
+    name: master
+    protocol: TCP
+  selector:
+    app: maxscale
